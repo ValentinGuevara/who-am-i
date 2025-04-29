@@ -1,13 +1,11 @@
 terraform {
   backend "s3" {
-    bucket  = "terraform-s3-state-92300"
-    key     = "my-terraform-project"
-    region  = "eu-central-1"
-    profile = "valentin-guevara-sandbox-1_ADMIN_ACCESS"
+    bucket = "terraform-s3-state-92300"
+    key    = "my-terraform-project"
+    region = "eu-central-1"
   }
 }
 
 provider "aws" {
-  region  = "eu-west-3"
-  profile = "valentin-guevara-sandbox-1_ADMIN_ACCESS"
+  region = "eu-west-3"
 }

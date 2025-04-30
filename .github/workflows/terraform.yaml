@@ -5,12 +5,14 @@ on:
     branches:
       - main
     paths:
+      - .github/**
       - iac/**
   pull_request:
     branches:
       - main
       - feat/**
     paths:
+      - .github/**
       - iac/**
 
 permissions:

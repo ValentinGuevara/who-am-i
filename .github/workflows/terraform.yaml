@@ -44,6 +44,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-3
+          role-session-name: iam-github-assume-session
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
 
       - name: Setup Terraform with specified version on the runner

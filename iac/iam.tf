@@ -43,6 +43,7 @@ data "aws_iam_policy_document" "deploy" {
       "apigateway:*",
       "dynamodb:*",
       "iam:*",
+      "s3:*",
     ]
     resources = ["*"]
   }

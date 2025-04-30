@@ -52,6 +52,16 @@ jobs:
         with:
           terraform_version: 1.9.7
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      - name: Build lambda function
+        run: |
+          chmod +x ./build_lambda.sh
+          ./build_lambda.sh
+
       - name: Terraform init
         id: init
         run: terraform init

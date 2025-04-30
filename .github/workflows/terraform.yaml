@@ -45,7 +45,7 @@ jobs:
         with:
           aws-region: eu-west-3
           role-session-name: iam-github-assume-session
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: arn:aws:iam::637423508544:role/github_oidc_role
 
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v3
@@ -54,7 +54,7 @@ jobs:
 
       - name: Terraform init
         id: init
-        run: terraform init -backend-config="bucket=${{ secrets.BUCKET_TF_STATE}}"
+        run: terraform init"
 
       - name: Terraform format
         id: fmt

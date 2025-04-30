@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "deploy" {
 
 resource "aws_iam_policy" "deploy" {
   name        = "ci-deploy-policy"
-  description = "Policy used for deployments on CI/CD"
+  description = "Policy used for deployments on CI"
   policy      = data.aws_iam_policy_document.deploy.json
 }
 

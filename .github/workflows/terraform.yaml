@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - terraform/**
+      - iac/**
   pull_request:
     branches:
       - main
     paths:
-      - terraform/**
+      - iac/**
 
 permissions:
   id-token: write

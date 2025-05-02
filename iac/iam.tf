@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "oidc" {
 
     condition {
       test     = "StringLike"
-      values   = ["repo:ValentinGuevara/introducing-myself"]
+      values   = ["repo:ValentinGuevara/who-am-i:*"]
       variable = "token.actions.githubusercontent.com:sub"
     }
   }
@@ -43,6 +43,7 @@ data "aws_iam_policy_document" "deploy" {
       "apigateway:*",
       "dynamodb:*",
       "iam:*",
+      "s3:*",
     ]
     resources = ["*"]
   }

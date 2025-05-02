@@ -21,7 +21,7 @@ This project serves as a sandbox for exploring best practices in DevOps, backend
 
 ## 🚦 Build Status
 
-![Terraform Deploy Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg?branch=main)
+![Terraform Deploy Status](https://github.com/ValentinGuevara/who-am-i/actions/workflows/terraform.yaml/badge.svg?branch=main)
 
 ---
 

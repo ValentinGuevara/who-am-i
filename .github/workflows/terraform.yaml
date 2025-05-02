@@ -23,9 +23,46 @@ env:
   TF_LOG: INFO
 
 jobs:
+  build:
+    name: "Build lambda"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout the repository to the runner
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            build_lambda.sh
+            lambdas
+          sparse-checkout-cone-mode: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
+
+      - name: Build lambda function
+        run: |
+          chmod +x ./build_lambda.sh
+          ./build_lambda.sh insert-place
+
+      - name: Cache lambdas
+        id: cache-lambdas
+        uses: actions/cache@v4
+        with:
+          path: |
+            lambdas/insert-place/dist
+          key: ${{ runner.os }}-lambdas
+
   terraform:
     name: "Terraform Infrastructure Update"
     runs-on: ubuntu-latest
+    needs: build
     defaults:
       run:
         shell: bash
@@ -52,17 +89,6 @@ jobs:
         with:
           terraform_version: 1.9.7
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: true
-
-      - name: Build lambda function
-        run: |
-          chmod +x ./build_lambda.sh
-          ./build_lambda.sh
-
       - name: Terraform init
         id: init
         run: terraform init
@@ -74,6 +100,14 @@ jobs:
       - name: Terraform validate
         id: validate
         run: terraform validate
+
+      - name: Cache lambdas
+        id: cache-lambdas
+        uses: actions/cache@v4
+        with:
+          path: |
+            lambdas/insert-place/dist
+          key: ${{ runner.os }}-lambdas
 
       - name: Terraform plan
         id: plan

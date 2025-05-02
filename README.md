@@ -21,7 +21,7 @@ This project serves as a sandbox for exploring best practices in DevOps, backend
 
 ## 🚦 Build Status
 
-[![Build Status](https://img.shields.io/github/workflow/status/ValentinGuevara/who-am-i/CI)](https://github.com/ValentinGuevara/who-am-i/actions)
+![Terraform Deploy Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg?branch=main)
 
 ---
 

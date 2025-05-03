@@ -9,3 +9,7 @@ variable "lambda_name" {
 variable "api_name" {
   type = string
 }
+
+variable "lambda_invoke_integration_arn" {
+  type = string
+}

@@ -25,6 +25,8 @@ This project serves as a sandbox for exploring best practices in DevOps, backend
 
 ![Terraform Deploy Status](https://github.com/ValentinGuevara/who-am-i/actions/workflows/terraform.yaml/badge.svg?branch=main)
 
+![Vercel Deploy](https://deploy-badge.vercel.app/vercel/who-am-i-psi?name=Who+Am+I)
+
 ---
 
 ## 🗂️ Repository Structure

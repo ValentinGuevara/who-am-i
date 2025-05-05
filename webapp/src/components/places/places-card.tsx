@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import Image from 'next/image';
 
+import { Place, postPlace } from '@/app/actions/places';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/registry/new-york-v4/ui/card';
 import { Input } from '@/registry/new-york-v4/ui/input';
@@ -28,38 +29,21 @@ export function PlacesCard() {
 
     const isFormNotValid = !location || !type || (type === 'meetup' && !date);
 
-    const sendPlace = () => {
-        fetch('/api/places', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
+    const sendPlace = async () => {
+        try {
+            await postPlace({
                 location,
-                type,
+                type: type as Place['type'],
                 date: type === 'meetup' ? date : undefined
-            })
-        })
-            .then((res) => {
-                if (!res.ok) {
-                    toast('Une erreur est survenue', {
-                        description: "Impossible d'envoyer les données."
-                    });
-
-                    return;
-                }
-                toast('Envoi du lieu...', {
-                    description: 'Merci beaucoup pour ta proposition !'
-                });
-
-                return res.json();
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-                toast('Une erreur est survenue', {
-                    description: "Impossible d'envoyer les données."
-                });
             });
+            toast('Envoi du lieu...', {
+                description: 'Merci beaucoup pour ta proposition !'
+            });
+        } catch (error) {
+            toast('Une erreur est survenue', {
+                description: "Impossible d'envoyer les données."
+            });
+        }
     };
 
     return (

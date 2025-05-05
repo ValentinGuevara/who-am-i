@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { DatePicker } from './places-date';
 import { PlacesDataTable } from './places-table';
+import { toast } from 'sonner';
 
 export type TypeSelect = 'pro' | 'fun' | 'meetup';
 export function PlacesCard() {
@@ -27,12 +28,46 @@ export function PlacesCard() {
 
     const isFormNotValid = !location || !type || (type === 'meetup' && !date);
 
+    const sendPlace = () => {
+        fetch('/api/places', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                location,
+                type,
+                date: type === 'meetup' ? date : undefined
+            })
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    toast('Une erreur est survenue', {
+                        description: "Impossible d'envoyer les données."
+                    });
+
+                    return;
+                }
+                toast('Envoi du lieu...', {
+                    description: 'Merci beaucoup pour ta proposition !'
+                });
+
+                return res.json();
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+                toast('Une erreur est survenue', {
+                    description: "Impossible d'envoyer les données."
+                });
+            });
+    };
+
     return (
         <Card className='w-full'>
             <CardHeader>
                 <CardTitle>Partagez vos recommandations</CardTitle>
                 <CardDescription>
-                    La communauté est le lien social qui manque à l'environnement tech. On la construit ensemble ?
+                    La communauté et le lien social, pilier de l'environnement tech. On le fait grandir ensemble ?
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -70,6 +105,10 @@ export function PlacesCard() {
                                 />
                                 <Button
                                     disabled={isFormNotValid}
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        sendPlace();
+                                    }}
                                     className='cursor-pointer'
                                     size='lg'
                                     variant='outline'>

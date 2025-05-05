@@ -18,8 +18,6 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context, ca
     }
     const { id, type, date } = JSON.parse(event.body);
 
-    //Check place id exists
-
     const command = new PutCommand({
         TableName: process.env.TABLE_NAME_PLACE,
         Item: {
@@ -28,6 +26,7 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context, ca
           PLACE_DATE: date,
           CREATED_AT: new Date().toISOString(),
         },
+        ConditionExpression: 'attribute_not_exists(PLACE_ID)',
       });
     
     try {

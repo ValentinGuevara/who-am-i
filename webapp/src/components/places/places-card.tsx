@@ -5,13 +5,14 @@ import * as React from 'react';
 import Image from 'next/image';
 
 import { Place, postPlace } from '@/app/actions/places';
+import { getCaptchaToken } from '@/lib/utils';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/registry/new-york-v4/ui/card';
-import { Input } from '@/registry/new-york-v4/ui/input';
 import { Label } from '@/registry/new-york-v4/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/registry/new-york-v4/ui/select';
 
 import { DatePicker } from './places-date';
+import { PlacesSearch } from './places-search';
 import { PlacesDataTable } from './places-table';
 import { toast } from 'sonner';
 
@@ -21,17 +22,12 @@ export function PlacesCard() {
     const [type, setType] = React.useState<string>();
     const [date, setDate] = React.useState<Date>();
 
-    const searchLocation = (event: React.ChangeEvent<HTMLInputElement>) => {
-        event.preventDefault();
-        console.log('Searching for location:', event.target.value);
-        setLocation(event.target.value);
-    };
-
     const isFormNotValid = !location || !type || (type === 'meetup' && !date);
 
     const sendPlace = async () => {
         try {
-            await postPlace({
+            const token = await getCaptchaToken();
+            await postPlace(token, {
                 location,
                 type: type as Place['type'],
                 date: type === 'meetup' ? date : undefined
@@ -59,12 +55,7 @@ export function PlacesCard() {
                     <div className='grid w-full items-center gap-4'>
                         <div className='flex flex-col space-y-1.5'>
                             <Label htmlFor='place'>Lieu</Label>
-                            <Input
-                                onChange={searchLocation}
-                                id='place'
-                                placeholder='Je vous écoute...'
-                                value={location}
-                            />
+                            <PlacesSearch onPlaceSelected={(currentPlaceId: string) => setLocation(currentPlaceId)} />
                         </div>
                         <div className='po flex flex-col space-y-1.5'>
                             <Label htmlFor='type'>Type d'adresse</Label>

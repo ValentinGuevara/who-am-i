@@ -21,7 +21,10 @@ const checkToken = async (token: string | null): Promise<boolean> => {
 export async function searchPlace(token: string | null, query: string) {
     const mapsKey = process.env.MAPS_API_KEY;
     if (!mapsKey) {
-        throw new Error('Maps key is not defined');
+        return {
+            success: false,
+            message: 'No Maps Google credentials',
+        };
     }
     if(!(await checkToken(token))) {
         return {
@@ -61,13 +64,41 @@ export async function postPlace(token: string | null, place: Place) {
             message: 'Captcha verification failed',
         };
     }
+    const placesApiKey = process.env.PLACES_API_KEY;
+    if (!placesApiKey) {
+        return {
+            success: false,
+            message: 'No custom backend API credentials',
+        };
+    }
+    const url = new URL(process.env.PLACES_API_URL as string);
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': placesApiKey,
+        },
+        body: JSON.stringify({
+            id: place.location,
+            type: place.type,
+            date: place.date ? place.date.toISOString() : undefined,
+        }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        return {
+            success: false,
+            message: data.message,
+        };
+    }
+
     after(async () => {
-        console.log('Analytics incremented');
+        console.log('Data sent to backend, increment a counter for monitoring...');
     });
 
     return {
         success: true,
         message: 'Place sent successfully',
-        place,
+        place: data,
     };
 }

@@ -27,11 +27,16 @@ export function PlacesCard() {
     const sendPlace = async () => {
         try {
             const token = await getCaptchaToken();
-            await postPlace(token, {
+            const response = await postPlace(token, {
                 location,
                 type: type as Place['type'],
                 date: type === 'meetup' ? date : undefined
             });
+            if (!response.success) {
+                return toast('Une erreur est survenue', {
+                    description: response.message
+                });
+            }
             toast('Envoi du lieu...', {
                 description: 'Merci beaucoup pour ta proposition !'
             });

@@ -33,10 +33,9 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context, ca
         await docClient.send(command);
     } catch (error) {
         console.error('Error inserting place:', error);
-        // Return explicit error for client
         return callback(null, {
             statusCode: 500,
-            body: JSON.stringify({ message: 'Error inserting place' }),
+            body: JSON.stringify({ message: 'Ce lieu est déjà enregistré' }),
         });
     }
 

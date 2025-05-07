@@ -1,8 +1,8 @@
-variable "function_name" {
-  type = string
-}
-variable "zip_file" {
-  type = string
+variable "functions" {
+  type = map(object({
+    function_name = string
+    zip_file      = string
+  }))
 }
 variable "handler" {
   type = string

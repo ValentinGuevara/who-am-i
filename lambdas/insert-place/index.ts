@@ -5,8 +5,6 @@ import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
-// Good practice : use iac loggers
-
 export const lambdaHandler = async (event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback): Promise<void> => {
     console.log(`Event: ${JSON.stringify(event, null, 2)}`);
     console.log(`Context: ${JSON.stringify(context, null, 2)}`);
@@ -21,7 +19,8 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context, ca
     const command = new PutCommand({
         TableName: process.env.TABLE_NAME_PLACE,
         Item: {
-          PLACE_ID: id,
+          PK: 'PLACE',
+          PLACE_ID: `GOOG-${id}`,
           PLACE_TYPE: type,
           PLACE_DATE: date,
           CREATED_AT: new Date().toISOString(),

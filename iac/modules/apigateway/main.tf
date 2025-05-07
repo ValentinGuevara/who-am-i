@@ -40,11 +40,12 @@ resource "aws_api_gateway_usage_plan_key" "example_usage_plan_key" {
   usage_plan_id = aws_api_gateway_usage_plan.usage_plan.id
 }
 
-
-resource "aws_api_gateway_method" "proxy" {
+//-------------CREATING ROUTES-------------
+resource "aws_api_gateway_method" "proxys" {
+  for_each         = var.lambda_routes
   rest_api_id      = aws_api_gateway_rest_api.my_api.id
   resource_id      = aws_api_gateway_resource.root.id
-  http_method      = "POST"
+  http_method      = each.value.http_method
   authorization    = "NONE"
   api_key_required = true
   request_parameters = {
@@ -52,16 +53,16 @@ resource "aws_api_gateway_method" "proxy" {
   }
 }
 
-//-------------BEGIN ROUTE-------------
-resource "aws_api_gateway_integration" "lambda_integration_insert" {
+resource "aws_api_gateway_integration" "lambda_integrations" {
+  for_each                = var.lambda_routes
   rest_api_id             = aws_api_gateway_rest_api.my_api.id
   resource_id             = aws_api_gateway_resource.root.id
-  http_method             = aws_api_gateway_method.proxy.http_method
+  http_method             = aws_api_gateway_method.proxys[each.key].http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = var.lambda_invoke_integration_arn
+  uri                     = each.value.lambda_invoke_arn
 }
-//-------------END ROUTE-------------
+//-------------END ROUTES-------------
 
 resource "aws_api_gateway_deployment" "deployment_places" {
   rest_api_id = aws_api_gateway_rest_api.my_api.id
@@ -74,7 +75,7 @@ resource "aws_api_gateway_deployment" "deployment_places" {
     create_before_destroy = true
   }
 
-  depends_on = [aws_api_gateway_method.proxy, aws_api_gateway_integration.lambda_integration_insert]
+  depends_on = [aws_api_gateway_method.proxys, aws_api_gateway_integration.lambda_integrations]
 }
 
 resource "aws_api_gateway_stage" "deployment_stage" {

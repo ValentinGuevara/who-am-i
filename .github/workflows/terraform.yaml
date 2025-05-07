@@ -24,7 +24,7 @@ env:
 
 jobs:
   build:
-    name: "Build lambda"
+    name: "Build lambdas"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -50,6 +50,7 @@ jobs:
         run: |
           chmod +x ./build_lambda.sh
           ./build_lambda.sh insert-place
+          ./build_lambda.sh get-places
 
       - name: Cache lambdas
         id: cache-lambdas
@@ -57,6 +58,7 @@ jobs:
         with:
           path: |
             lambdas/insert-place/dist
+            lambdas/get-places/dist
           key: ${{ runner.os }}-lambdas
 
   terraform:
@@ -107,6 +109,7 @@ jobs:
         with:
           path: |
             lambdas/insert-place/dist
+            lambdas/get-places/dist
           key: ${{ runner.os }}-lambdas
 
       - name: Terraform plan

@@ -1,5 +1,6 @@
-resource "aws_iam_role" "lambda_exec" {
-  name = "${var.function_name}_role"
+resource "aws_iam_role" "lambda_execs" {
+  for_each = var.functions
+  name     = "${each.value.function_name}_iam_role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -12,19 +13,20 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-resource "aws_iam_policy_attachment" "lambda_logs" {
-  name       = "${var.function_name}_logs"
-  roles      = [aws_iam_role.lambda_exec.name]
+resource "aws_iam_role_policy_attachment" "lambda_basics" {
+  for_each   = var.functions
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = aws_iam_role.lambda_execs[each.key].name
 }
 
-resource "aws_lambda_function" "new_lambda" {
-  function_name    = var.function_name
-  role             = aws_iam_role.lambda_exec.arn
+resource "aws_lambda_function" "new_lambdas" {
+  for_each         = var.functions
+  function_name    = each.value.function_name
+  role             = aws_iam_role.lambda_execs[each.key].arn
   handler          = var.handler
   runtime          = var.runtime
-  filename         = var.zip_file
-  source_code_hash = filebase64sha256(var.zip_file)
+  filename         = each.value.zip_file
+  source_code_hash = filebase64sha256(each.value.zip_file)
   environment {
     variables = var.environment
   }

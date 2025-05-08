@@ -1,5 +1,9 @@
 import React from 'react';
 
+import Link from 'next/link';
+
+import { Place, getPlaces } from '@/app/actions/places';
+import { getCaptchaToken } from '@/lib/utils';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Checkbox } from '@/registry/new-york-v4/ui/checkbox';
 import {
@@ -26,73 +30,58 @@ import {
 
 import { format } from 'date-fns';
 import { ArrowUpDown, Calendar as CalendarIcon, ChevronDown, MoreHorizontal } from 'lucide-react';
+import { toast } from 'sonner';
 
-const data: Payment[] = [
-    // {
-    //     id: 'm5gr84i9',
-    //     amount: 316,
-    //     status: 'success',
-    //     email: 'ken99@example.com'
-    // },
-    // {
-    //     id: '3u1reuv4',
-    //     amount: 242,
-    //     status: 'success',
-    //     email: 'Abe45@example.com'
-    // },
-    // {
-    //     id: 'derv1ws0',
-    //     amount: 837,
-    //     status: 'processing',
-    //     email: 'Monserrat44@example.com'
-    // },
-    // {
-    //     id: '5kma53ae',
-    //     amount: 874,
-    //     status: 'success',
-    //     email: 'Silas22@example.com'
-    // },
-    // {
-    //     id: 'bhqecj4p',
-    //     amount: 721,
-    //     status: 'failed',
-    //     email: 'carmella@example.com'
-    // }
-];
-
-export type Payment = {
-    id: string;
-    amount: number;
-    status: 'pending' | 'processing' | 'success' | 'failed';
-    email: string;
-};
-
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Place>[] = [
     {
         accessorKey: 'location',
-        header: () => <div className='text-center'>Lieu</div>,
-        cell: ({ row }) => <div>{row.getValue('location')}</div>
+        header: () => <span>Lieu</span>,
+        cell: ({ row }) => {
+            const id = row.getValue<string>('location').substring(5);
+
+            return (
+                <Link
+                    className='font-medium text-blue-600 underline'
+                    href={`https://www.google.com/maps/place/?q=place_id:${id}`}
+                    target='_blank'
+                    rel='noopener noreferrer'>
+                    {id.length > 12 ? `${id.slice(0, 12)}...` : id}
+                </Link>
+            );
+        }
     },
     {
         accessorKey: 'type',
         header: ({ column }) => {
             return (
                 <Button
-                    className='flex w-full items-center justify-center'
+                    className='flex w-full items-start justify-start px-0'
                     variant='ghost'
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                    <span className='text-center'>Type</span>
+                    <span>Type</span>
                     <ArrowUpDown />
                 </Button>
             );
         },
-        cell: ({ row }) => <div className='capitalize'>{row.getValue('type')}</div>
+        cell: ({ row }) => <div className='pl-2'>{row.getValue<string>('type').toUpperCase()}</div>
     },
     {
         accessorKey: 'date',
-        header: () => <div className='text-center'>Date</div>,
+        header: () => <span>Date</span>,
         cell: ({ row }) => {
+            if (!row.getValue('date')) {
+                return <div className='font-medium'></div>;
+            }
             const _date = format(row.getValue('date'), 'dd/MM/yyyy');
+
+            return <div className='font-medium'>{_date}</div>;
+        }
+    },
+    {
+        accessorKey: 'createdAt',
+        header: () => <span>Ajouté le</span>,
+        cell: ({ row }) => {
+            const _date = format(row.getValue('createdAt'), 'dd/MM/yyyy');
 
             return <div className='font-medium'>{_date}</div>;
         }
@@ -100,13 +89,45 @@ export const columns: ColumnDef<Payment>[] = [
 ];
 
 export function PlacesDataTable() {
+    const [places, setPlaces] = React.useState<Place[]>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+    const [pagination, setPagination] = React.useState({
+        pageIndex: 0,
+        pageSize: 3
+    });
+    const [lastEvaluatedKey, setLastEvaluatedKey] = React.useState<string>('');
+
+    const refreshPlaces = async (nextPage: boolean = false) => {
+        try {
+            const token = await getCaptchaToken();
+            const response = await getPlaces(token, nextPage ? lastEvaluatedKey : null);
+            if (!response.success) {
+                return toast('Une erreur est survenue', {
+                    description: response.message
+                });
+            }
+            console.log(response);
+            setLastEvaluatedKey(response.places?.lastEvaluatedKey as string);
+            setPlaces(response.places?.items || []);
+        } catch (error) {
+            toast('Une erreur est survenue', {
+                description: 'Impossible de récupérer les données.'
+            });
+        }
+    };
+
+    React.useEffect(() => {
+        refreshPlaces();
+        const interval = setInterval(refreshPlaces, 1000 * 30);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const table = useReactTable({
-        data,
+        data: places,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -116,11 +137,13 @@ export function PlacesDataTable() {
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
+        onPaginationChange: setPagination,
         state: {
             sorting,
             columnFilters,
             columnVisibility,
-            rowSelection
+            rowSelection,
+            pagination
         }
     });
 
@@ -177,7 +200,7 @@ export function PlacesDataTable() {
                         variant='outline'
                         size='sm'
                         onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}>
+                        disabled={lastEvaluatedKey !== ''}>
                         Suivant
                     </Button>
                 </div>

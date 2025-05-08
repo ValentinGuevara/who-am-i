@@ -6,7 +6,7 @@ import Script from 'next/script';
 
 import { ThemeProvider } from 'next-themes';
 
-import NavigationBar from '@/app/(delete-this-and-modify-page.tsx)/NavigationBar';
+import NavigationBar from '@/components/NavigationBar';
 import '@/app/globals.css';
 import { Toaster } from '@/registry/new-york-v4/ui/sonner';
 

@@ -21,7 +21,7 @@ resource "aws_api_gateway_usage_plan" "usage_plan" {
     stage  = aws_api_gateway_stage.deployment_stage.stage_name
   }
   quota_settings {
-    limit  = 50
+    limit  = 1000
     period = "DAY"
   }
   throttle_settings {

@@ -7,6 +7,7 @@ export type Place = {
     location: string;
     type: 'pro' | 'fun' | 'meetup';
     date?: Date;
+    createdAt?: Date;
 };
 
 const checkToken = async (token: string | null): Promise<boolean> => {
@@ -100,5 +101,52 @@ export async function postPlace(token: string | null, place: Place) {
         success: true,
         message: 'Place sent successfully',
         place: data,
+    };
+}
+
+export async function getPlaces(token: string | null, lastKey: string | null): Promise<{
+    success: boolean;
+    message: string;
+    places?: {
+        items: Place[];
+        lastEvaluatedKey?: string;
+    };
+}>{
+    if(!(await checkToken(token))) {
+        return {
+            success: false,
+            message: 'Captcha verification failed',
+        };
+    }
+    const placesApiKey = process.env.PLACES_API_KEY;
+    if (!placesApiKey) {
+        return {
+            success: false,
+            message: 'No custom backend API credentials',
+        };
+    }
+    const url = new URL(process.env.PLACES_API_URL as string);
+    if(lastKey) {
+            url.searchParams.set('lastEvaluatedKey', lastKey);
+    }
+    url.searchParams.set('limit', "3");
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'x-api-key': placesApiKey,
+        }
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        return {
+            success: false,
+            message: data.message,
+        };
+    }
+
+    return {
+        success: true,
+        message: 'Places retrieved',
+        places: data,
     };
 }

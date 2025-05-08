@@ -28,7 +28,12 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context, ca
         return callback(null, {
             statusCode: 200,
             body: JSON.stringify({
-                items: Items,
+                items: Items?.map(item => ({
+                    location: item.PLACE_ID,
+                    type: item.PLACE_TYPE,
+                    date: item.PLACE_DATE,
+                    createdAt: item.CREATED_AT,
+                })),
                 count: Count,
                 lastEvaluatedKey: LastEvaluatedKey,
                 scannedCount: ScannedCount,

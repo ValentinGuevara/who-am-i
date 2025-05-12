@@ -129,7 +129,8 @@ export async function getPlaces(token: string | null, lastKey: string | null): P
     if(lastKey) {
             url.searchParams.set('lastEvaluatedKey', lastKey);
     }
-    url.searchParams.set('limit', "3");
+    url.searchParams.set('limit', "7");
+    console.log('URL:', url.toString());
     const response = await fetch(url, {
         method: 'GET',
         headers: {

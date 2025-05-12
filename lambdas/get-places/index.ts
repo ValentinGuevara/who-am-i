@@ -5,26 +5,52 @@ import { QueryCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
+const makeRequestPayload = (exclusiveStartKey?: string) => ({
+    TableName: process.env.TABLE_NAME_PLACE,
+    KeyConditionExpression: "PK = :pk AND begins_with(PLACE_ID, :googPrefix)",
+    ExpressionAttributeValues: {
+        ":pk": "PLACE",
+        ":googPrefix": "GOOG-",
+    },
+    ExclusiveStartKey: exclusiveStartKey ? {
+        "PK": "PLACE",
+        "PLACE_ID": exclusiveStartKey,
+    } : undefined,
+});
+
+const hasNextPage = async (exclusiveStartKey: string): Promise<boolean> => {
+    const moreItemsResponse = new QueryCommand({
+        ...makeRequestPayload(exclusiveStartKey),
+        Select: "COUNT",
+        Limit: 1
+    });
+    const { Count } = await docClient.send(moreItemsResponse);
+  
+    return Count && Count > 0 ? true : false;
+  }
+
 export const lambdaHandler = async (event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback): Promise<void> => {
     console.log(`Event: ${JSON.stringify(event, null, 2)}`);
     console.log(`Context: ${JSON.stringify(context, null, 2)}`);
     
     const { lastEvaluatedKey, limit } = event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
-    
+
     try {
         const command = new QueryCommand({
-            TableName: process.env.TABLE_NAME_PLACE,
-            KeyConditionExpression: "PK = :pk AND begins_with(PLACE_ID, :googPrefix)",
-            ExpressionAttributeValues: {
-                ":pk": "PLACE",
-                ":googPrefix": "GOOG-",
-            },
-            ExclusiveStartKey: lastEvaluatedKey ? JSON.parse(lastEvaluatedKey) : undefined,
+            ...makeRequestPayload(lastEvaluatedKey),
             Limit: limit ? Number(limit) : 7,
             ConsistentRead: true,
           });
         
         const { Count, Items, LastEvaluatedKey, ScannedCount } = await docClient.send(command);
+        const lastEvaluatedId = LastEvaluatedKey ? LastEvaluatedKey['PLACE_ID'] as string : undefined;
+        
+        // Check if more items are available for accurate pagination
+        let hasMoreItems = false;
+        if(lastEvaluatedId) {
+            hasMoreItems = await hasNextPage(lastEvaluatedId);
+        }
+        
         return callback(null, {
             statusCode: 200,
             body: JSON.stringify({
@@ -35,7 +61,7 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context, ca
                     createdAt: item.CREATED_AT,
                 })),
                 count: Count,
-                lastEvaluatedKey: LastEvaluatedKey,
+                lastEvaluatedKey: hasMoreItems ? lastEvaluatedId : null,
                 scannedCount: ScannedCount,
             }),
         });

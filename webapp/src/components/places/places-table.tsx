@@ -89,29 +89,40 @@ export const columns: ColumnDef<Place>[] = [
 ];
 
 export function PlacesDataTable() {
+    const [page, setPage] = React.useState<{
+        pageIndex: number;
+    }>({
+        pageIndex: -1
+    });
     const [places, setPlaces] = React.useState<Place[]>([]);
+    const [lastEvaluatedKeys, setLastEvaluatedKeys] = React.useState<string[]>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
-    const [pagination, setPagination] = React.useState({
-        pageIndex: 0,
-        pageSize: 3
-    });
-    const [lastEvaluatedKey, setLastEvaluatedKey] = React.useState<string>('');
 
-    const refreshPlaces = async (nextPage: boolean = false) => {
+    const refreshPlaces = async () => {
         try {
             const token = await getCaptchaToken();
-            const response = await getPlaces(token, nextPage ? lastEvaluatedKey : null);
+            const keyToUse = lastEvaluatedKeys[page.pageIndex] || null;
+
+            const response = await getPlaces(token, keyToUse);
             if (!response.success) {
                 return toast('Une erreur est survenue', {
                     description: response.message
                 });
             }
-            console.log(response);
-            setLastEvaluatedKey(response.places?.lastEvaluatedKey as string);
-            setPlaces(response.places?.items || []);
+            if (response.places) {
+                setPlaces(response.places.items);
+                setLastEvaluatedKeys((prev) => {
+                    const newKey = response.places?.lastEvaluatedKey as string;
+                    if (newKey && !prev.includes(newKey)) {
+                        return [...prev, newKey];
+                    }
+
+                    return prev;
+                });
+            }
         } catch (error) {
             toast('Une erreur est survenue', {
                 description: 'Impossible de récupérer les données.'
@@ -119,12 +130,24 @@ export function PlacesDataTable() {
         }
     };
 
+    const previousPage = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        event.preventDefault();
+        const newNumberPage = page.pageIndex > 0 ? page.pageIndex - 1 : -1;
+        setPage({
+            pageIndex: newNumberPage
+        });
+    };
+
+    const nextPage = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        event.preventDefault();
+        setPage({
+            pageIndex: page.pageIndex + 1
+        });
+    };
+
     React.useEffect(() => {
         refreshPlaces();
-        const interval = setInterval(refreshPlaces, 1000 * 30);
-
-        return () => clearInterval(interval);
-    }, []);
+    }, [page]);
 
     const table = useReactTable({
         data: places,
@@ -137,15 +160,17 @@ export function PlacesDataTable() {
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
-        onPaginationChange: setPagination,
+        manualPagination: true,
         state: {
             sorting,
             columnFilters,
             columnVisibility,
-            rowSelection,
-            pagination
+            rowSelection
         }
     });
+
+    console.log('PlacesDataTable', page);
+    console.log('Evaluated', lastEvaluatedKeys);
 
     return (
         <div>
@@ -189,18 +214,16 @@ export function PlacesDataTable() {
             </div>
             <div className='flex items-center justify-end space-x-2 py-4'>
                 <div className='space-x-2'>
-                    <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}>
+                    <Button variant='outline' size='sm' onClick={previousPage} disabled={page.pageIndex === -1}>
                         Précédent
                     </Button>
                     <Button
                         variant='outline'
                         size='sm'
-                        onClick={() => table.nextPage()}
-                        disabled={lastEvaluatedKey !== ''}>
+                        onClick={nextPage}
+                        disabled={
+                            !lastEvaluatedKeys[page.pageIndex + 1] || lastEvaluatedKeys[page.pageIndex + 1] === ''
+                        }>
                         Suivant
                     </Button>
                 </div>

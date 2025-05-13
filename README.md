@@ -36,7 +36,8 @@ This project serves as a sandbox for exploring best practices in DevOps, backend
 ├── .github/workflows/       # CI/CD pipelines
 ├── iac/                     # Terraform configurations
 ├── lambdas/
-│   └── insert-place/        # AWS Lambda function code
+│   ├── insert-place/        # AWS Lambda function code
+│   └── get-places/          # AWS Lambda function code
 ├── webapp/                  # Frontend application source
 ├── build_lambda.sh          # Script to package Lambda functions
 └── README.md                # Project documentation
@@ -48,15 +49,22 @@ This project serves as a sandbox for exploring best practices in DevOps, backend
 
 - **Infrastructure:**
   - Terraform
-  - AWS (Lambda, API Gateway, S3, etc.)
+  - AWS (Lambda, API Gateway, DynamoDB, IAM, etc.)
+  - Vercel for next app w/ server actions
 - **Backend:**
-  - Node.js
+  - Node.js 22
   - TypeScript
 - **Frontend:**
   - React
   - TypeScript
+  - Next 15
+  - Tailwind
+  - Shadcdn UI
 - **CI/CD:**
   - GitHub Actions
+- **Google Services**
+  - Bot Captcha detection
+  - Google Maps Places API
 
 ---
 

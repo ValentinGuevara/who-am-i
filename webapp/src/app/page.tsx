@@ -26,7 +26,7 @@ const Page = (): JSX.Element => {
         toast('Démarrage du téléchargement', {
             description: 'Dernière version sur AWS S3'
         });
-        saveAs('https://example.com/mon-cv.pdf', 'mon-cv.pdf');
+        saveAs('/CV_Guevara_Valentin.pdf', 'CV_Guevara_Valentin.pdf');
     };
 
     return (
@@ -44,15 +44,15 @@ const Page = (): JSX.Element => {
                             href='https://www.youtube.com/watch?v=mvN2Cv8uFvM'
                             target='_blank'
                             rel='noopener noreferrer'>
-                            je foule Paris
+                            je foule une nouvelle scène
                         </a>{' '}
                         avec une ambition claire : <span className='text-xl font-bold'>construire</span>,{' '}
                         <span className='text-xl font-bold'>grandir</span>,{' '}
                         <span className='text-xl font-bold'>laisser une trace</span>.
                     </span>
                     <span className='text-md mt-4 text-center font-medium'>
-                        Déterminé, prêt à tout pour atteindre mon objectif, je suis venu relever le défi de la plus
-                        grande scène française. Envie d’un bon plan, d’une aventure, d’un projet qui surprend ?
+                        Déterminé, prêt à tout pour atteindre mon objectif, je suis venu relever le défi du plus grand
+                        terrain international. Envie d’un bon plan, d’une aventure, d’un projet qui surprend ?
                     </span>
                 </div>
                 <Carousel
@@ -80,7 +80,7 @@ const Page = (): JSX.Element => {
                         ))}
                     </CarouselContent>
                 </Carousel>
-                <div className='row-start-3 hidden flex-wrap items-center justify-center gap-6 sm:flex'>
+                <div className='flex flex-col space-y-2 sm:row-start-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-6'>
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -104,7 +104,7 @@ const Page = (): JSX.Element => {
                     </TooltipProvider>
                     <Button className='cursor-pointer' size='lg' variant='outline' onClick={startDownload}>
                         <Image aria-hidden src='/download.svg' alt='File icon' width={16} height={16} />
-                        Téléchargez mon CV
+                        Téléchargez mon CV (EN)
                     </Button>
                     <Button className='cursor-pointer' size='lg' variant='outline'>
                         <Link

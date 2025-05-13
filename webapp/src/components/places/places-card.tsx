@@ -48,7 +48,7 @@ export function PlacesCard() {
     };
 
     return (
-        <Card className='w-full'>
+        <Card className='w-full px-2'>
             <CardHeader>
                 <CardTitle>Partagez vos recommandations</CardTitle>
                 <CardDescription>
@@ -103,7 +103,7 @@ export function PlacesCard() {
                                 </Button>
                             </div>
                         </div>
-                        <div className='flex flex-col space-y-1.5'>
+                        <div className='mx-2 flex flex-col space-y-1.5'>
                             <PlacesDataTable />
                         </div>
                     </div>

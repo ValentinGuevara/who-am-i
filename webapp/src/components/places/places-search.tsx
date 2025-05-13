@@ -38,6 +38,7 @@ export const PlacesSearch: React.FC<PlacesSearchProps> = ({ onPlaceSelected }) =
         try {
             const _debouncedSearch = debounce(async () => {
                 const token = await getCaptchaToken();
+                // https://stackoverflow.com/a/73658131 - get location from google places
                 const locationFounds = await searchPlace(token, newLocation);
                 const founds = locationFounds.suggestions
                     .map((location: Location) => ({
@@ -67,13 +68,17 @@ export const PlacesSearch: React.FC<PlacesSearchProps> = ({ onPlaceSelected }) =
                 <Button variant='outline' role='combobox' aria-expanded={open} className='w-[300px] justify-between'>
                     {value
                         ? locations.find((location) => JSON.parse(location.value).text === value)?.label
-                        : 'Recherche sur Google...'}
+                        : 'Recherche sur Google (France)'}
                     <ChevronsUpDown className='opacity-50' />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className='w-[200px] p-0'>
                 <Command>
-                    <CommandInput onInput={searchLocation} placeholder='Recherche sur Google...' className='h-9' />
+                    <CommandInput
+                        onInput={searchLocation}
+                        placeholder='Recherche sur Google (France)'
+                        className='h-9'
+                    />
                     <CommandList>
                         <CommandEmpty>No location found.</CommandEmpty>
                         <CommandGroup>
